@@ -10,7 +10,7 @@ let con = mysql.createConnection({
     host: "localhost",
     user: "testUser",
     password: "MyPassword123!",
-    insecureAuth: trues
+    insecureAuth: true
 });
 
 con.connect(function (err) {
@@ -97,7 +97,7 @@ http.createServer((req, res) => {
                             break;
 
                         case "/api?cmd=getCoffeeUsage":
-                            con.query("SELECT User.ID as UserID,FirstName,LastName,ItemType.Nazev,SUM(Amount) as Pocet FROM UsageEntry INNER JOIN User ON UsageEntry.User_ID = User.ID INNER JOIN ItemType ON UsageEntry.ItemType_ID = ItemType.ID GROUP BY User.ID,FirstName,LastName,ItemType.Nazev;", function (err, result, fields) {
+                            con.query("SELECT User.ID as UserID,FirstName,LastName,ItemType.ItemName,SUM(Amount) AS Amount FROM UsageEntry INNER JOIN User ON UsageEntry.User_ID = User.ID INNER JOIN ItemType ON UsageEntry.ItemType_ID = ItemType.ID GROUP BY User.ID,FirstName,LastName,ItemType.ItemName;", function (err, result, fields) {
                                 if (err) throw err;
                                 res.write(JSON.stringify(result));
                                 res.end();
@@ -107,6 +107,9 @@ http.createServer((req, res) => {
                         case "/api?cmd=addEntry":
                             let itemID = requestData.itemId;
                             let amount = requestData.amount;
+                            console.log(itemID);
+                            console.log(id);
+                            console.log(amount);
                             con.query("INSERT INTO UsageEntry(ItemType_ID, User_ID, Amount) VALUES(?, ?, ?);", [itemID, id, amount], function (err, result, fields) {
                                 if (err) {
                                     res.write(JSON.stringify({ "msg": 1, "err": err }));

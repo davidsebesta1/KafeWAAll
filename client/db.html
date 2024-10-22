@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+        <title>Document</title>
+    </head>
+    
+<body>
+ 
+
+    <header>
+        <ul class="nav">
+            <li class="link l-a"><a href="index.html">Udělal jsem kávu/burza</a></li>
+            <li class="link l-b" id="invite-friend">Pozvat přítele</li>
+        </ul>
+    </header>
+    <div id="qrcode-overlay" class="overlay" style="display: none;">
+        <div class="qrcode-container">
+            <canvas id="qrcode"></canvas><br>
+            <button id="close-qrcode">Zavřít QR kód</button>
+        </div>
+    </div>
+    <img src="coffee.png" alt="Popis obrázku" class="top-left-image">
+    <img src="coffee.png" alt="Popis obrázku" class="top-right-image">
+    <main>
+
+    </main>
+
+
+    <script>
+        $(document).ready(function() {
+            const qr = new QRious({
+                element: document.getElementById('qrcode'),
+                size: 200
+            });
+
+            $('#invite-friend').on('click', function() {
+                qr.set({
+                    value: "login.html"
+                });
+                $('#qrcode-overlay').show();
+            });
+
+            $('#close-qrcode').on('click', function() {
+                $('#qrcode-overlay').hide();
+            });
+        });
+    </script>
+
+</body>
+</html>
