@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="clientLogin.js"></script>
     <title>Document</title>
 </head>
 <body>
     <img src="coffee.png" alt="Popis obrázku" class="top-left-image">
     <img src="coffee.png" alt="Popis obrázku" class="top-right-image">
     <section class="login">
-        <form action="/login" method="POST">
+        <form action="/login" method="POST" id="form">
             <h2>Přihlásit se</h2>
             <label for="username">Uživatelské jméno:</label>
             <input class="lgn" type="text" id="username" name="username" required><br><br>
