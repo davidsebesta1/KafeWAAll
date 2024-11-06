@@ -30,33 +30,8 @@
     </div>
 
     <main>
-        <form method="POST">
-            <input type="radio" name="user" id="masopust" value="Masopust Lukáš">
-            <label for="masopust">Masopust Lukáš</label><br>
-
-            <input type="radio" name="user" id="molic" value="Molic Jan">
-            <label for="molic">Molic Jan</label><br>
-
-            <input type="radio" name="user" id="adamek" value="Adamek Daniel">
-            <label for="adamek">Adamek Daniel</label><br>
-
-            <input type="radio" name="user" id="weber" value="Weber David">
-            <label for="weber">Weber David</label><br>
-
-            <label for="mleko" class="type-of-drink">Mléko:</label>
-            <input type="range" id="mleko" name="mleko" min="0" max="10" value="0"> <span>0</span><br>
-
-            <label for="espresso" class="type-of-drink">Espresso:</label>
-            <input type="range" id="espresso" name="espresso" min="0" max="10" value="0"> <span>0</span><br>
-
-            <label for="coffee" class="type-of-drink">Coffe:</label>
-            <input type="range" id="coffee" name="coffee" min="0" max="10" value="0"> <span>0</span><br>
-
-            <label for="long" class="type-of-drink">Long:</label>
-            <input type="range" id="long" name="long" min="0" max="10" value="0"> <span>0</span><br>
-
-            <label for="doppio" class="type-of-drink">Doppio+:</label>
-            <input type="range" id="doppio" name="doppio" min="0" max="10" value="0"> <span>0</span><br>
+        <form id="form" method="POST">
+           
             <div class="sbmt-btn">
                 <input type="submit" value="odeslat">
             </div>
@@ -64,13 +39,8 @@
     </main>
 
     <footer>
-        <div class="burza">
-            <p>Nutné čištění po ... použitích</p>
-            <p>Zásoba mléko: </p>
-            <p>Zásoba espresso: </p>
-            <p>Zásoba cofee:</p>
-            <p>Zásoba long:</p>
-            <p>Zásoba doppio:</p>
+        <div id="storage" class="burza">
+
         </div>
     </footer>
 

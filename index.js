@@ -4,9 +4,37 @@ const bcrypt = require('bcrypt');
 const mysql = require('mysql2');
 const cookie = require('cookie'); // Import cookie for cookie handling
 const path = require("path");
+const WebSocket = require("ws");
+const { v4: uuidv4 } = require('uuid');
 
-const listeningIp = "0.0.0.0";
+const listeningIp = "127.0.0.1";
 const listeningPort = 8082;
+
+/*
+const saltRounds = 10;
+bcrypt.genSalt(saltRounds, (err, salt) => {
+    if (err) {
+        // Handle error
+        return;
+    }
+    
+    const userPassword = 'test'; // Replace with the actual password
+    bcrypt.hash(userPassword, salt, (err, hash) => {
+        if (err) {
+            // Handle error
+            return;
+        }
+    
+    // Hashing successful, 'hash' contains the hashed password
+    console.log('Hashed password:', hash);
+    });
+    
+});
+
+bcrypt.compare("test", '$2b$10$y6xAUuMeXb5/fd5QGUnPK.nqIBRuBSAFU14gKOpuaCQZo7jJnJNoC', (err, isMatch) => {
+    console.log(isMatch)
+});
+*/
 
 let con = mysql.createConnection({
     host: "localhost",
@@ -24,13 +52,16 @@ con.connect(function (err) {
     });
 });
 
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
     try {
         res.setHeader("Content-Type", "application/json");
+        res.setHeader('Access-Control-Allow-Origin', listeningIp);
+        res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, PATCH, POST, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Authorization');
 
         // Middleware to check authentication
+        const cookies = cookie.parse(req.headers.cookie || '');
         const isAuthenticated = (req) => {
-            const cookies = cookie.parse(req.headers.cookie || '');
             return cookies.userId ? true : false; // Check if userId cookie exists
         };
 
@@ -42,13 +73,24 @@ http.createServer((req, res) => {
             });
 
             req.on("end", () => {
+                const target = req.url.split("&")[0];
+                console.log(target);
+
                 let requestData;
                 try {
                     console.log(body);
-                    requestData = JSON.parse(body);
+                    requestData = body ? JSON.parse(body) : "";
                 } catch (error) {
                     res.write(JSON.stringify({ "msg": "Invalid JSON format" }));
                     res.end();
+                    return;
+                }
+
+                const cookies = cookie.parse(req.headers.cookie || '');
+                const userId = cookies.userId;
+
+                if (userId) {
+                    handleApiCommands(target, req, res, userId, requestData);
                     return;
                 }
 
@@ -70,9 +112,6 @@ http.createServer((req, res) => {
                         path: '/'
                     }));
 
-                    const target = req.url.split("&")[0];
-                    console.log(target);
-
                     if (target == "/login") {
                         res.writeHead(302, {
                             "Location": "/index.html",
@@ -83,7 +122,7 @@ http.createServer((req, res) => {
                     }
 
                     // Handle API commands
-                    handleApiCommands(target, res, id);
+                    handleApiCommands(target, req, res, id, requestData);
                 });
             });
         } else if (req.method === "GET") {
@@ -127,6 +166,36 @@ http.createServer((req, res) => {
 
 }).listen(listeningPort, listeningIp, () => {
     console.log("Server is running on " + listeningIp + ":" + listeningPort);
+});
+
+const wss = new WebSocket.Server({ server });
+
+function broadcast(data) {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
+        }
+    });
+};
+
+wss.on('connection', (ws, req) => {
+    const cookies = cookie.parse(req.headers.cookie || '');
+    const userId = cookies.userId;
+
+    if (!userId) {
+        ws.close();
+        return;
+    }
+
+    console.log(`WebSocket connection established for user ${userId}`);
+
+    ws.on('message', (message) => {
+        console.log(`Received message: ${message}`);
+    });
+
+    ws.on('close', () => {
+        console.log(`WebSocket connection closed for user ${userId}`);
+    });
 });
 
 function handleFileRequest(req, res, fileType, path) {
@@ -177,7 +246,9 @@ function authenticateUser(username, password, callback) {
     });
 }
 
-function handleApiCommands(target, res, id) {
+function handleApiCommands(target, req, res, id, data) {
+    console.log("aa");
+    console.log(target);
     switch (target) {
         case "/api?cmd=getItemTypeList":
             con.query("SELECT * FROM ItemType", function (err, result, fields) {
@@ -188,7 +259,7 @@ function handleApiCommands(target, res, id) {
             break;
 
         case "/api?cmd=getUsers":
-            con.query("SELECT * FROM User", function (err, result, fields) {
+            con.query("SELECT ID,FirstName,LastName FROM User", function (err, result, fields) {
                 if (err) throw err;
                 res.write(JSON.stringify(result));
                 res.end();
@@ -211,9 +282,24 @@ function handleApiCommands(target, res, id) {
             });
             break;
 
+        case "/api?cmd=getCoffeeStored":
+            con.query("SELECT ItemName,StoredAmount FROM ItemType;", function (err, result, fields) {
+                if (err) throw err;
+                res.write(JSON.stringify(result));
+                res.end();
+            });
+            break;
+
+        case "/api?cmd=getInviteQR":
+            res.write(JSON.stringify({ id: req.headers.host + "/register?uid=" + uuidv4() }));
+            res.end();
+
+            break;
+
+
         case "/api?cmd=addEntry":
-            let itemID = requestData.itemId;
-            let amount = requestData.amount;
+            let itemID = data.itemId;
+            let amount = data.amount;
             console.log(itemID);
             console.log(id);
             console.log(amount);
