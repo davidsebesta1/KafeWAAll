@@ -198,3 +198,29 @@ input[type="submit"]:active {
     height: auto;
     z-index: 1000;
 }
+
+
+/*REGISTER*/
+
+.register {
+    width: 400px;
+    background-color: white;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
+.register h2 {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.lgn {
+    height: 23px;
+    border-radius: 3px;
+    border: 1px solid black;
+    outline: none;    
+    padding: 3px;
+}

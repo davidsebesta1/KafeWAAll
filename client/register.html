@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="clientRegister.js"></script>
+    <title>Register</title>
+</head>
+<body>
+    <img src="coffee.png" alt="Popis obrázku" class="top-left-image">
+    <img src="coffee.png" alt="Popis obrázku" class="top-right-image">
+    <section class="register">
+        <form action="/register" method="POST" id="form">
+            <h2>Registrovat se</h2>
+            
+            <label for="username">Uživatelské jméno:</label>
+            <input class="lgn" type="text" id="username" name="username" required><br><br>
+            
+            <label for="password">Heslo:</label>
+            <input class="lgn" type="password" id="password" name="password" required><br><br>
+
+            <input type="submit" value="Registrovat se">
+        </form>        
+    </section>
+</body>
+</html>

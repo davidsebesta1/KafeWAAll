@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-        <script src="db.js"></script>
-        <title>Database</title>
-    </head>
-    
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="db.js"></script>
+    <title>Database</title>
+</head>
+
 <body>
- 
+
 
     <header>
         <ul class="nav">
@@ -33,27 +34,28 @@
 
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             let qrId;
             const qr = new QRious({
                 element: document.getElementById('qrcode'),
                 size: 200
             });
 
-            
 
-            $('#invite-friend').on('click', function() {
+
+            $('#invite-friend').on('click', function () {
                 qr.set({
                     value: "login.html"
                 });
                 $('#qrcode-overlay').show();
             });
 
-            $('#close-qrcode').on('click', function() {
+            $('#close-qrcode').on('click', function () {
                 $('#qrcode-overlay').hide();
             });
         });
     </script>
 
 </body>
+
 </html>
