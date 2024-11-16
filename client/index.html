@@ -31,7 +31,7 @@
 
     <main>
         <form id="form" method="POST">
-           
+
             <div class="sbmt-btn">
                 <input type="submit" value="odeslat">
             </div>
@@ -47,23 +47,39 @@
     <script src="script.js"></script>
 
     <script>
-        $(document).ready(function() {
-            const qr = new QRious({
-                element: document.getElementById('qrcode'),
-                size: 200
-            });
+        $('#invite-friend').on('click', function () {
 
-            $('#invite-friend').on('click', function() {
-                qr.set({
-                    value: "login.html"
+            $(document).ready(function () {
+                $.ajax({
+                    url: 'http://localhost:8082/api?cmd=getInviteQR',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+                        console.log(data)
+                        const qr = new QRious({
+                            element: document.getElementById('qrcode'),
+                            size: 200
+                        });
+
+                        qr.set({
+                            value: data.url
+                        });
+                        $('#qrcode-overlay').show();
+
+                    },
+                    error: function (xhr, status, error) {
+                        alert("An error occurred while fetching items: " + error);
+                    }
                 });
-                $('#qrcode-overlay').show();
-            });
 
-            $('#close-qrcode').on('click', function() {
-                $('#qrcode-overlay').hide();
             });
         });
+
+        $('#close-qrcode').on('click', function () {
+            $('#qrcode-overlay').hide();
+        });
+
     </script>
 </body>
 

@@ -10,6 +10,8 @@ const { v4: uuidv4 } = require('uuid');
 const listeningIp = "127.0.0.1";
 const listeningPort = 8082;
 
+let registrationGuids = [];
+
 /*
 const saltRounds = 10;
 bcrypt.genSalt(saltRounds, (err, salt) => {
@@ -65,6 +67,8 @@ const server = http.createServer((req, res) => {
             return cookies.userId ? true : false; // Check if userId cookie exists
         };
 
+        console.log("url:" + req.url)
+
         if (req.method === "POST") {
             let body = "";
 
@@ -98,6 +102,58 @@ const server = http.createServer((req, res) => {
                 const password = requestData.password;
 
                 authenticateUser(username, password, (authValid, id) => {
+                    if (target == "/register") {
+                        console.log("registering")
+                        const guid = requestData.guid;
+
+                        let hashedPswd;
+                        const saltRounds = 10;
+                        bcrypt.genSalt(saltRounds, (err, salt) => {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            console.log("egnerated!")
+
+                            bcrypt.hash(password, salt, (err, hash) => {
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+
+                                console.log("hashes!!!")
+
+                                hashedPswd = hash;
+
+                                // Hashing successful, 'hash' contains the hashed password
+                                console.log('Hashed password:',hashedPswd);
+
+                                con.query("INSERT INTO User(FirstName, LastName, Username, Password) VALUES(?, ?, ?, ?);", [requestData.firstName, requestData.lastName, username, hashedPswd], function (err, result, fields) {
+                                    if (err) throw err;
+                                    console.log("registered!")
+        
+                                    con.query("SELECT ID FROM User WHERE Username = ?", [username], function (err, result, fields) {
+                                        if (err) throw err;
+                                        res.setHeader('Set-Cookie', cookie.serialize('userId', result.ID, {
+                                            httpOnly: true,
+                                            secure: false, // Set to true if using HTTPS
+                                            maxAge: 3600,
+                                            path: '/'
+                                        }));
+                                        
+                                        res.write(JSON.stringify(result));
+                                        res.end();
+                                    });
+                                    return;
+                                });
+        
+                                return;
+                            });
+
+                        });
+
+                        return;
+                    }
                     if (!authValid) {
                         res.write(JSON.stringify({ "msg": "Invalid credentials" }));
                         res.end();
@@ -137,17 +193,35 @@ const server = http.createServer((req, res) => {
                     return;
                 }
                 handleFileRequest(req, res, 'text/html', './client/login.html');
-            } else if (req.url === '/clientLogin.js') {
+            } else if (req.url.split('?')[0] === "/register") {
+                if (isAuthenticated(req)) {
+                    res.writeHead(302, {
+                        "Location": "/index.html",
+                        "X-Custom-Redirect-Header": "Redirecting to new path"
+                    });
+                    res.end();
+                    return;
+                }
+                handleFileRequest(req, res, 'text/html', './client/register.html');
+            }
+            else if (req.url === '/clientLogin.js') {
                 handleFileRequest(req, res, 'text/javascript', './client/clientLogin.js');
-            } else if (req.url === '/style.css') {
+            }
+            else if (req.url === "/clientRegister.js") {
+                handleFileRequest(req, res, 'text/javascript', './client/clientRegister.js');
+            }
+            else if (req.url === '/style.css') {
                 handleFileRequest(req, res, 'text/css', './client/style.css');
-            } else if (req.url === "/coffee.png") {
+            }
+            else if (req.url === "/coffee.png") {
                 const imagePath = path.join(__dirname, 'client', req.url);
                 serveImage(req, res, imagePath);
-            } else if (isAuthenticated(req)) {
+            }
+            else if (isAuthenticated(req)) {
                 const filePath = `./client${req.url}`;
                 handleFileRequest(req, res, 'text/html', filePath);
-            } else {
+            }
+            else {
                 res.writeHead(401, { "Content-Type": "application/json" });
                 res.write(JSON.stringify({ "msg": "Authentication required" }));
                 res.end();
@@ -247,7 +321,6 @@ function authenticateUser(username, password, callback) {
 }
 
 function handleApiCommands(target, req, res, id, data) {
-    console.log("aa");
     console.log(target);
     switch (target) {
         case "/api?cmd=getItemTypeList":
@@ -291,11 +364,11 @@ function handleApiCommands(target, req, res, id, data) {
             break;
 
         case "/api?cmd=getInviteQR":
-            res.write(JSON.stringify({ id: req.headers.host + "/register?uid=" + uuidv4() }));
+            let uid = uuidv4();
+            registrationGuids.push(uid);
+            res.write(JSON.stringify({ url: req.headers.host + "/register?uid=" + uid }));
             res.end();
-
             break;
-
 
         case "/api?cmd=addEntry":
             let itemID = data.itemId;
